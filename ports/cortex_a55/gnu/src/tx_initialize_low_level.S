@@ -72,21 +72,28 @@
     .type    _tx_initialize_low_level, @function
 _tx_initialize_low_level:
 
-    MSR     DAIFSet, 0x3                        // Lockout interrupts
+    // Mquestion 为什么要关闭
+    //1 Mstep 作用:关闭当前核的IRQ和FIQ中断，
+    MSR     DAIFSet, 0x3                        // Lockout interrupts 
 
 
     /* Save the system stack pointer.  */
     // _tx_thread_system_stack_ptr = (VOID_PTR) (sp);
-
+    // 
+    //2 Mstep 把SP地址保存到_tx_thread_system_stack_ptr中
     LDR     x0, =_tx_thread_system_stack_ptr    // Pickup address of system stack ptr
     MOV     x1, sp                              // Pickup SP
+    // x1 - 15
+    // Mquestion 没搞懂，需要再搞明白
     SUB     x1, x1, #15                         //
+    // 是x1值为16位对齐的地址
     BIC     x1, x1, #0xF                        // Get 16-bit alignment
     STR     x1, [x0]                            // Store system stack
 
     /* Save the first available memory address.  */
+    // Image$$ZI$$Limit 表示的是ZI区在RAM里面的结束地址后面的一个地址。
     // _tx_initialize_unused_memory =  (VOID_PTR) Image$$ZI$$Limit;
-
+    // 
     LDR     x0, =_tx_initialize_unused_memory   // Pickup address of unused memory ptr
     LDR     x1, =__top_of_ram                   // Pickup unused memory address
     LDR     x1, [x1]                            //

@@ -49,7 +49,7 @@
    initialization function.  The content of this variable is passed
    to the application's system definition function.  */
 
-VOID     *_tx_initialize_unused_memory;
+VOID     *_tx_initialize_unused_memory; // ZI区域后的第一个可用内存的地址
 
 
 /**************************************************************************/

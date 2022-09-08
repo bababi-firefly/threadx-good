@@ -19,6 +19,7 @@ void   _tx_timer_interrupt(void);
 #define LED_BASE (volatile unsigned int *)0x1C010008
 
 
+// 0 - 7 - 0 - 7 应该是个流水灯的效果
 void nudge_leds(void) // Move LEDs along
 {
     static int state = 1;
@@ -27,7 +28,7 @@ void nudge_leds(void) // Move LEDs along
     if (state)
     {
         int max = (1 << 7);
-        value <<= 1;
+        value <<= 1; 
         if (value == max)
             state = 0;
     }
@@ -46,17 +47,20 @@ void nudge_leds(void) // Move LEDs along
 void init_timer(void)
 {
     // Enable interrupts
+    // 使能DAIF中断
     __asm("MSR DAIFClr, #0xF");
     setICC_IGRPEN1_EL1(igrpEnable);
 
     // Configure the SP804 timer to generate an interrupt
     setTimerBaseAddress(0x1C110000);
+    // 持续产生中断，计数器归零就会产生中断
     initTimer(0x200, SP804_AUTORELOAD, SP804_GENERATE_IRQ);
     startTimer();
 
     // The SP804 timer generates SPI INTID 34.  Enable
     // this ID, and route it to core 0.0.0.0 (this one!)
     SetSPIRoute(34, 0, gicdirouter_ModeSpecific);    // Route INTID 34 to 0.0.0.0 (this core)
+    // 设置SPI中断优先级
     SetSPIPriority(34, 0);                           // Set INTID 34 to priority to 0
     ConfigureSPI(34, gicdicfgr_Level);               // Set INTID 34 as level-sensitive
     EnableSPI(34);                                   // Enable INTID 34

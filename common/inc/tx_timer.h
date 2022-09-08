@@ -82,7 +82,7 @@ VOID        _tx_timer_thread_entry(ULONG timer_thread_input);
 /* Define the system clock value that is continually incremented by the
    periodic timer interrupt processing.  */
 
-TIMER_DECLARE volatile ULONG    _tx_timer_system_clock;
+TIMER_DECLARE volatile ULONG    _tx_timer_system_clock; // 这个值在timer中断触发时会++
 
 
 /* Define the current time slice value.  If non-zero, a time-slice is active.
@@ -113,7 +113,7 @@ TIMER_DECLARE TX_TIMER_INTERNAL **_tx_timer_list_end;
 /* Define the current timer pointer in the list.  This pointer is moved sequentially
    through the timer list by the timer interrupt handler.  */
 
-TIMER_DECLARE TX_TIMER_INTERNAL **_tx_timer_current_ptr;
+TIMER_DECLARE TX_TIMER_INTERNAL **_tx_timer_current_ptr; // 在定时器的中断处理中，这个指针会一直在timer list中轮询
 
 
 /* Define the timer expiration flag.  This is used to indicate that a timer

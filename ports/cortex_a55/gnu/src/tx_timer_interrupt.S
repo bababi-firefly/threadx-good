@@ -76,7 +76,7 @@ _tx_timer_interrupt:
        for use.  */
 
     /* Increment the system clock.  */
-    // _tx_timer_system_clock++;
+    //1 Mstep 系统滴答时间++ _tx_timer_system_clock++; // 
 
     LDR     x1, =_tx_timer_system_clock         // Pickup address of system clock
     LDR     w0, [x1, #0]                        // Pickup system clock
@@ -86,33 +86,38 @@ _tx_timer_interrupt:
     /* Test for time-slice expiration.  */
     /* if (_tx_timer_time_slice)
     { */
-
+    //2 Mstep 判断是否还有剩余的时间片
     LDR     x3, =_tx_timer_time_slice           // Pickup address of time-slice
     LDR     w2, [x3, #0]                        // Pickup time-slice
-    CMP     w2, #0                              // Is it non-active?
+    CMP     w2, #0                              // Is it non-active? 
+    //3 Mstep 时间片用尽
     BEQ     __tx_timer_no_time_slice            // Yes, skip time-slice processing
 
        /* Decrement the time_slice.  */
        /* _tx_timer_time_slice--;  */
-
+    //4 Mstep 时间片有剩余的话 --
     SUB     w2, w2, #1                          // Decrement the time-slice
     STR     w2, [x3, #0]                        // Store new time-slice value
 
        /* Check for expiration.  */
        /* if (__tx_timer_time_slice == 0)  */
-
+    //5 Msetp --之后判断是否还有剩余的时间片
     CMP     w2, #0                              // Has it expired?
+    //6 Msetp 不为0跳转
+    // Mquestion 时间片未用完，为啥要跳转到用完情况下的处理
     BNE     __tx_timer_no_time_slice            // No, skip expiration processing
 
        /* Set the time-slice expired flag.  */
        /* _tx_timer_expired_time_slice =  TX_TRUE;  */
 
+    //7 Mstep 为0了，设置时间片耗尽状态为TRUE
     LDR     x3, =_tx_timer_expired_time_slice   // Pickup address of expired flag
     MOV     w0, #1                              // Build expired value
     STR     w0, [x3, #0]                        // Set time-slice expiration flag
 
     /* } */
 
+// 时间片未耗尽
 __tx_timer_no_time_slice:
 
     /* Test for timer expiration.  */
@@ -123,11 +128,12 @@ __tx_timer_no_time_slice:
     LDR     x0, [x1, #0]                        // Pickup current timer
     LDR     x2, [x0, #0]                        // Pickup timer list entry
     CMP     x2, #0                              // Is there anything in the list?
-    BEQ     __tx_timer_no_timer                 // No, just increment the timer
+    BEQ     __tx_timer_no_timer                 // No, just increment the timer   // 如果timer指针为空，会直接跳到下一个timer。
 
         /* Set expiration flag.  */
         // _tx_timer_expired =  TX_TRUE;
-
+    
+    // 设置 _tx_timer_expired 为True
     LDR     x3, =_tx_timer_expired              // Pickup expiration flag address
     MOV     w2, #1                              // Build expired value
     STR     w2, [x3, #0]                        // Set expired flag
@@ -136,6 +142,8 @@ __tx_timer_no_time_slice:
     // }
     // else
     // {
+
+// 跳转到下一个timer
 __tx_timer_no_timer:
 
         /* No timer expired, increment the timer pointer.  */
