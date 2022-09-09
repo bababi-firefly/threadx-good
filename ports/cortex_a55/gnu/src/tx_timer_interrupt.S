@@ -117,6 +117,7 @@ _tx_timer_interrupt:
     /* } */
 
 // 未耗尽 或者 没启用时间片的会到这里。
+// _tx_timer_current_ptr 指向的是循环数组中的一个元素(这个元素也是此处下挂的循环链表的链头)
 __tx_timer_no_time_slice:
 
     /* Test for timer expiration.  */
