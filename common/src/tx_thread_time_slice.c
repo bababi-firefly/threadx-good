@@ -113,21 +113,25 @@ UINT            preempt_disable;
     {
 
         /* Make sure the thread is still active, i.e. not suspended.  */
-        if (thread_ptr -> tx_thread_state == TX_READY)
+        if (thread_ptr -> tx_thread_state == TX_READY) // 判断线程是否为active状态
         {
 
             /* Setup a fresh time-slice for the thread.  */
+            // 重新初始化它的时间片
             thread_ptr -> tx_thread_time_slice =  thread_ptr -> tx_thread_new_time_slice;
 
             /* Reset the actual time-slice variable.  */
+            // 更新全局时间片变量
             _tx_timer_time_slice =  thread_ptr -> tx_thread_time_slice;
 
             /* Determine if there is another thread at the same priority and preemption-threshold
                is not set.  Preemption-threshold overrides time-slicing.  */
+            // 有其它ready就绪的线程
             if (thread_ptr -> tx_thread_ready_next != thread_ptr)
             {
 
                 /* Check to see if preemption-threshold is not being used.  */
+                // 未启用抢占情况下，才把下一个ready线程放到队列头，启用抢占时，同优先级链表中不会切换。
                 if (thread_ptr -> tx_thread_priority == thread_ptr -> tx_thread_preempt_threshold)
                 {
 

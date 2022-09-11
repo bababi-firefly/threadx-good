@@ -84,12 +84,17 @@ VOID  _tx_timer_expiration_process(VOID)
 
 TX_INTERRUPT_SAVE_AREA
 
+/* 
+   确定定时器是否到期的处理，比如应用定时器，溢出时间和函数tx_thread_sleep调用等，是在系统定时器任务里面还是在定时器中断里面调用。
+   默认是在定时任务里面，当定义了下面函数后，将直接在定时器中断里面处理，可以去掉定时器任务所消耗资源。 */
 #ifdef TX_TIMER_PROCESS_IN_ISR
 
 TX_TIMER_INTERNAL           *expired_timers;
 TX_TIMER_INTERNAL           *reactivate_timer;
 TX_TIMER_INTERNAL           *next_timer;
 TX_TIMER_INTERNAL           *previous_timer;
+
+/* 用于设置定时器激活是否采用内联方式，默认此功能是关闭的。如果使能后，内联方式的执行速度快，但增加代码量 */
 #ifdef TX_REACTIVATE_INLINE
 TX_TIMER_INTERNAL           **timer_list;               /* Timer list pointer           */
 UINT                        expiration_time;            /* Value used for pointer offset*/
@@ -98,6 +103,7 @@ ULONG                       delta;
 TX_TIMER_INTERNAL           *current_timer;
 VOID                        (*timeout_function)(ULONG id);
 ULONG                       timeout_param =  ((ULONG) 0);
+/* 使能定时器信息获取 */
 #ifdef TX_TIMER_ENABLE_PERFORMANCE_INFO
 TX_TIMER                    *timer_ptr;
 #endif
@@ -108,7 +114,7 @@ TX_TIMER                    *timer_ptr;
     /* Don't process in the ISR, wakeup the system timer thread to process the
        timer expiration.  */
 
-    /* Disable interrupts.  */
+    /* Disable interrupts.  */ // 执行前关闭中断，防止处理时被打断。
     TX_DISABLE
 
 #ifdef TX_NOT_INTERRUPTABLE

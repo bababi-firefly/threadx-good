@@ -396,6 +396,7 @@ THREAD_DECLARE  TX_THREAD *     _tx_thread_priority_list[TX_MAX_PRIORITIES];
    disabled.  It is used internally by ThreadX to prevent preemption of a thread in
    the middle of a service that is resuming or suspending another thread.  */
 
+// 用来标示禁止抢占，防止在线程挂起 或者 恢复过程中被抢占，大于0表示禁止抢占
 THREAD_DECLARE  volatile UINT   _tx_thread_preempt_disable;
 
 

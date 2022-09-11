@@ -71,6 +71,7 @@
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
+// 将对应的timer从激活的定时器链表中删除。
 VOID  _tx_timer_system_deactivate(TX_TIMER_INTERNAL *timer_ptr)
 {
 

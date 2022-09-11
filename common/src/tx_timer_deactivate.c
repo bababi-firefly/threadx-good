@@ -177,6 +177,7 @@ UINT                active_timer_list;
 
                 /* No, it hasn't expired. Now check for remaining time greater than the list
                    size.  */
+                // 滴答数大于timer entry时，还未超时
                 if (internal_ptr -> tx_timer_internal_remaining_ticks > TX_TIMER_ENTRIES)
                 {
 

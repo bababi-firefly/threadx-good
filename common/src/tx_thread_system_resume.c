@@ -114,6 +114,7 @@ UINT            map_index;
 #ifndef TX_NO_TIMER
 
     /* Deactivate the timeout timer if necessary.  */
+    // 
     if (thread_ptr -> tx_thread_timer.tx_timer_internal_list_head != TX_NULL)
     {
 

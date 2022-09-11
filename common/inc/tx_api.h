@@ -293,8 +293,8 @@ typedef struct TX_TIMER_INTERNAL_STRUCT
 {
 
     /* Define the remaining ticks and re-initialization tick values.  */
-    ULONG               tx_timer_internal_remaining_ticks;
-    ULONG               tx_timer_internal_re_initialize_ticks;
+    ULONG               tx_timer_internal_remaining_ticks;  // 超时时钟滴答数
+    ULONG               tx_timer_internal_re_initialize_ticks; // 重设值
 
     /* Define the timeout function and timeout function parameter.  */
     VOID                (*tx_timer_internal_timeout_function)(ULONG id);
@@ -423,7 +423,7 @@ typedef struct TX_THREAD_STRUCT
 
     /* Define the thread's timer block.   This is used for thread
        sleep and timeout requests.  */
-    TX_TIMER_INTERNAL   tx_thread_timer;
+    TX_TIMER_INTERNAL   tx_thread_timer; // 线程结构自带，用来当做sleep使用或者超时请求。
 
     /* Define the thread's cleanup function and associated data.  This
        is used to cleanup various data structures when a thread
