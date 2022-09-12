@@ -82,12 +82,12 @@ TX_THREAD       *thread_ptr;
 
     /* Lockout interrupts while the thread is being resumed.  */
     TX_DISABLE
-
+    // 1 Mstep 获取线程指针
     /* Pickup thread pointer.  */
     TX_THREAD_GET_CURRENT(thread_ptr)
 
     /* Determine if this is a legal request.  */
-
+    // 2 Mstep 如果current thread 指针为空，返回错误
     /* Is there a current thread?  */
     if (thread_ptr == TX_NULL)
     {
@@ -170,6 +170,7 @@ TX_THREAD       *thread_ptr;
             TX_RESTORE
 #else
 
+            // 设置挂起状态，设置定时器定时时间
             /* Set the suspending flag. */
             thread_ptr -> tx_thread_suspending =  TX_TRUE;
 

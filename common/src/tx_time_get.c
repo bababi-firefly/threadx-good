@@ -44,6 +44,7 @@
 /*                                                                        */
 /*    This function retrieves the internal, free-running, system clock    */
 /*    and returns it to the caller.                                       */
+/*    获取系统时钟                                                         */
 /*                                                                        */
 /*  INPUT                                                                 */
 /*                                                                        */

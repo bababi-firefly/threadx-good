@@ -293,23 +293,23 @@ typedef struct TX_TIMER_INTERNAL_STRUCT
 {
 
     /* Define the remaining ticks and re-initialization tick values.  */
-    ULONG               tx_timer_internal_remaining_ticks;  // 超时时钟滴答数
-    ULONG               tx_timer_internal_re_initialize_ticks; // 重设值
+    ULONG               tx_timer_internal_remaining_ticks;  // 剩下的滴答计数值
+    ULONG               tx_timer_internal_re_initialize_ticks; // 重新初始化时的滴答值
 
     /* Define the timeout function and timeout function parameter.  */
-    VOID                (*tx_timer_internal_timeout_function)(ULONG id);
-    ULONG               tx_timer_internal_timeout_param;
+    VOID                (*tx_timer_internal_timeout_function)(ULONG id); // 超时回调函数
+    ULONG               tx_timer_internal_timeout_param; // 超时回调函数参数
 
 
     /* Define the next and previous internal link pointers for active
        internal timers.  */
     struct TX_TIMER_INTERNAL_STRUCT
-                        *tx_timer_internal_active_next,
-                        *tx_timer_internal_active_previous;
+                        *tx_timer_internal_active_next,  // 下一个定时器指针
+                        *tx_timer_internal_active_previous; // 上一个定时器指针
 
     /* Keep track of the pointer to the head of this list as well.  */
     struct TX_TIMER_INTERNAL_STRUCT
-                        **tx_timer_internal_list_head;
+                        **tx_timer_internal_list_head; // 链表头用于追踪
 
     /* Define optional extension to internal timer control block.  */
     TX_TIMER_INTERNAL_EXTENSION
@@ -331,19 +331,19 @@ typedef struct TX_TIMER_STRUCT
 {
 
     /* Define the timer ID used for error checking.  */
-    ULONG               tx_timer_id;
+    ULONG               tx_timer_id; // 定时器ID
 
     /* Define the timer's name.  */
-    CHAR                *tx_timer_name;
+    CHAR                *tx_timer_name; // 定时器的名字
 
     /* Define the actual contents of the timer.  This is the block that
        is used in the actual timer expiration processing.  */
-    TX_TIMER_INTERNAL   tx_timer_internal;
+    TX_TIMER_INTERNAL   tx_timer_internal; // 定时器实际内核
 
     /* Define the pointers for the created list.  */
     struct TX_TIMER_STRUCT
-                        *tx_timer_created_next,
-                        *tx_timer_created_previous;
+                        *tx_timer_created_next, // 已创建定时器的链表中指向下一个定时器
+                        *tx_timer_created_previous; // 已创建定时器的链表中指向上一个定时器
 
     /* Define optional extension to timer control block.  */
     TX_TIMER_EXTENSION
@@ -380,19 +380,19 @@ typedef struct TX_THREAD_STRUCT
        assembly language code.  Any changes in this section could
        necessitate changes in the assembly language.  */
 
-    ULONG               tx_thread_id;                   /* Control block ID         */
-    ULONG               tx_thread_run_count;            /* Thread's run counter     */
-    VOID                *tx_thread_stack_ptr;           /* Thread's stack pointer   */
-    VOID                *tx_thread_stack_start;         /* Stack starting address   */
-    VOID                *tx_thread_stack_end;           /* Stack ending address     */
-    ULONG               tx_thread_stack_size;           /* Stack size               */
-    ULONG               tx_thread_time_slice;           /* Current time-slice       */
-    ULONG               tx_thread_new_time_slice;       /* New time-slice           */
+    ULONG               tx_thread_id;                   /* Control block ID         */ // 线程ID
+    ULONG               tx_thread_run_count;            /* Thread's run counter     */ // 运行次数计数器
+    VOID                *tx_thread_stack_ptr;           /* Thread's stack pointer   */ // 堆栈指针
+    VOID                *tx_thread_stack_start;         /* Stack starting address   */ // 堆栈起始地址
+    VOID                *tx_thread_stack_end;           /* Stack ending address     */ // 堆栈结束地址
+    ULONG               tx_thread_stack_size;           /* Stack size               */ // 堆栈大小
+    ULONG               tx_thread_time_slice;           /* Current time-slice       */ // 当前时间片(剩余运行时间)
+    ULONG               tx_thread_new_time_slice;       /* New time-slice           */ // 新的时间片。调度时，每次时间片用尽后重新赋值给tx_thread_time_slice
 
     /* Define pointers to the next and previous ready threads.  */
     struct TX_THREAD_STRUCT
-                        *tx_thread_ready_next,
-                        *tx_thread_ready_previous;
+                        *tx_thread_ready_next,                                         // 指向下一个就绪线程的指针
+                        *tx_thread_ready_previous;                                     // 指向前一个就绪线程的指针
 
     /***************************************************************/
 
@@ -400,12 +400,12 @@ typedef struct TX_THREAD_STRUCT
        is typically defined to whitespace or a pointer type in tx_port.h.  */
     TX_THREAD_EXTENSION_0
 
-    CHAR                *tx_thread_name;                /* Pointer to thread's name     */
-    UINT                tx_thread_priority;             /* Priority of thread (0-1023)  */
-    UINT                tx_thread_state;                /* Thread's execution state     */
-    UINT                tx_thread_delayed_suspend;      /* Delayed suspend flag         */
-    UINT                tx_thread_suspending;           /* Thread suspending flag       */
-    UINT                tx_thread_preempt_threshold;    /* Preemption threshold         */
+    CHAR                *tx_thread_name;                /* Pointer to thread's name     */ // 线程名
+    UINT                tx_thread_priority;             /* Priority of thread (0-1023)  */ // 线程优先级
+    UINT                tx_thread_state;                /* Thread's execution state     */ // 线程运行状态
+    UINT                tx_thread_delayed_suspend;      /* Delayed suspend flag         */ // 线程延迟挂起标志
+    UINT                tx_thread_suspending;           /* Thread suspending flag       */ // 线程正在挂起标志
+    UINT                tx_thread_preempt_threshold;    /* Preemption threshold         */ // 线程抢占阈值
 
     /* Define the thread schedule hook. The usage of this is port/application specific,
        but when used, the function pointer designated is called whenever the thread is
@@ -418,8 +418,8 @@ typedef struct TX_THREAD_STRUCT
        is recompiled.  */
 
     /* Define the thread's entry point and input parameter.  */
-    VOID                (*tx_thread_entry)(ULONG id);
-    ULONG               tx_thread_entry_parameter;
+    VOID                (*tx_thread_entry)(ULONG id); // 线程入口函数指针
+    ULONG               tx_thread_entry_parameter;    // 线程参数
 
     /* Define the thread's timer block.   This is used for thread
        sleep and timeout requests.  */
@@ -429,15 +429,15 @@ typedef struct TX_THREAD_STRUCT
        is used to cleanup various data structures when a thread
        suspension is lifted or terminated either by the user or
        a timeout.  */
-    VOID                (*tx_thread_suspend_cleanup)(struct TX_THREAD_STRUCT *thread_ptr, ULONG suspension_sequence);
-    VOID                *tx_thread_suspend_control_block;
+    VOID                (*tx_thread_suspend_cleanup)(struct TX_THREAD_STRUCT *thread_ptr, ULONG suspension_sequence); // 线程清理函数
+    VOID                *tx_thread_suspend_control_block; // 线程需要清理的相关数据地址
     struct TX_THREAD_STRUCT
-                        *tx_thread_suspended_next,
-                        *tx_thread_suspended_previous;
-    ULONG               tx_thread_suspend_info;
+                        *tx_thread_suspended_next, // 指向下一个挂起线程的指针
+                        *tx_thread_suspended_previous; // 指向前一个挂起线程的指针
+    ULONG               tx_thread_suspend_info; // 用来记录等待的事件
     VOID                *tx_thread_additional_suspend_info;
-    UINT                tx_thread_suspend_option;
-    UINT                tx_thread_suspend_status;
+    UINT                tx_thread_suspend_option; // 
+    UINT                tx_thread_suspend_status; // 挂起状态
 
     /* Define the second port extension in the thread control block. This
        is typically defined to whitespace or a pointer type in tx_port.h.  */
@@ -446,8 +446,8 @@ typedef struct TX_THREAD_STRUCT
     /* Define pointers to the next and previous threads in the
        created list.  */
     struct TX_THREAD_STRUCT
-                        *tx_thread_created_next,
-                        *tx_thread_created_previous;
+                        *tx_thread_created_next, // 线程created list中，指向下一个线程指针
+                        *tx_thread_created_previous; // 线程created list中，指向上一个线程指针
 
     /* Define the third port extension in the thread control block. This
        is typically defined to whitespace in tx_port.h.  */
@@ -1745,7 +1745,7 @@ UINT        _tx_timer_performance_system_info_get(ULONG *activates, ULONG *react
                 ULONG *deactivates, ULONG *expirations, ULONG *expiration_adjusts);
 
 ULONG       _tx_time_get(VOID);
-VOID        _tx_time_set(ULONG new_time);
+VOID        _tx_time_set_tx_time_set(ULONG new_time);
 
 
 /* Define error checking shells for API services.  These are only referenced by the

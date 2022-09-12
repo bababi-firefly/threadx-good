@@ -141,7 +141,7 @@ TIMER_DECLARE TX_TIMER_INTERNAL *_tx_timer_expired_timer_ptr;
 
 /* Define the timer thread's control block.  */
 
-TIMER_DECLARE TX_THREAD         _tx_timer_thread;
+TIMER_DECLARE TX_THREAD         _tx_timer_thread; 
 
 
 /* Define the variable that holds the timer thread's starting stack address.  */

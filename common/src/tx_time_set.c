@@ -44,6 +44,7 @@
 /*                                                                        */
 /*    This function modifies the internal, free-running, system clock     */
 /*    as specified by the caller.                                         */
+/*    设置系统时钟                                                         */
 /*                                                                        */
 /*  INPUT                                                                 */
 /*                                                                        */

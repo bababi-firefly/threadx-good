@@ -337,7 +337,9 @@ THREAD_DECLARE  ULONG           _tx_thread_created_count;
    initialized to TX_INITIALIZE_IN_PROGRESS to indicate initialization is
    active.  */
 
-THREAD_DECLARE  volatile ULONG  _tx_thread_system_state;
+// 0 表示线程在执行获取系统空闲
+// other 表示中断或者正在初始化
+THREAD_DECLARE  volatile ULONG  _tx_thread_system_state; 
 
 
 /* Define the 32-bit priority bit-maps. There is one priority bit map for each

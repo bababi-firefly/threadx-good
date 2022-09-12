@@ -219,6 +219,7 @@ TX_TIMER                    *timer_ptr;
 #endif
 
                     /* Decrement the remaining ticks of the timer.  */
+                    // 减少一圈的ticks
                     current_timer -> tx_timer_internal_remaining_ticks =
                             current_timer -> tx_timer_internal_remaining_ticks - TX_TIMER_ENTRIES;
 

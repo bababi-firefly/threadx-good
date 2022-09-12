@@ -98,7 +98,7 @@ TX_TIMER_INTERNAL *_tx_timer_expired_timer_ptr;
 
 /* Define the timer thread's control block.  */
 
-TX_THREAD         _tx_timer_thread;
+TX_THREAD         _tx_timer_thread; // 定时器线程
 
 
 /* Define the variable that holds the timer thread's starting stack address.  */
@@ -216,7 +216,7 @@ UINT    status;
 
 #ifndef TX_DISABLE_REDUNDANT_CLEARING
 
-
+   // 1 Mstep 初始化各种变量
     /* Initialize the system clock to 0.  */
     _tx_timer_system_clock =      ((ULONG) 0);
 
@@ -259,6 +259,7 @@ UINT    status;
     /* Create the system timer thread.  This thread processes all of the timer
        expirations and reschedules.  Its stack and priority are defined in the
        low-level initialization component.  */
+   // 2 Mstep 创建系统定时器线程
     do
     {
 
