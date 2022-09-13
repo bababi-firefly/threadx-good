@@ -414,7 +414,7 @@ TX_TIMER                    *timer_ptr;
                     current_timer -> tx_timer_internal_list_head = TX_NULL;
 
                     /* Activate the current timer.  */
-                    _tx_timer_system_activate(current_timer);
+                    _tx_timer_system_activate(current_timer); // 激活定时器，将其放入_tx_timer_list中
 #endif
                 }
 

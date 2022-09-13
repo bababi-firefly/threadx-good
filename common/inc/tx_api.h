@@ -134,7 +134,7 @@ extern   "C" {
 /* API input parameters and general constants.  */
 
 #define TX_NO_WAIT                      ((ULONG)  0)
-#define TX_WAIT_FOREVER                 ((ULONG)  0xFFFFFFFFUL)
+#define TX_WAIT_FOREVER                 ((ULONG)  0xFFFFFFFFUL)  // TX_WAIT_FOREVER表示没有超时时间，信号量等只有等到了才返回。。。。
 #define TX_AND                          ((UINT)   2)
 #define TX_AND_CLEAR                    ((UINT)   3)
 #define TX_OR                           ((UINT)   0)

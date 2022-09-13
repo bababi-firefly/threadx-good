@@ -76,6 +76,7 @@
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
+// 激活超时定时器，挂载到超时定时器链表中
 VOID  _tx_timer_system_activate(TX_TIMER_INTERNAL *timer_ptr)
 {
 
@@ -88,24 +89,27 @@ ULONG                       expiration_time;
 
 
     /* Pickup the remaining ticks.  */
+    // 1 Msetp 获取剩余滴答值
     remaining_ticks =  timer_ptr -> tx_timer_internal_remaining_ticks;
 
+    // 2 Mstep 剩余滴答值不为0
     /* Determine if there is a timer to activate.  */
     if (remaining_ticks != ((ULONG) 0))
     {
 
         /* Determine if the timer is set to wait forever.  */
-        if (remaining_ticks != TX_WAIT_FOREVER)
+        if (remaining_ticks != TX_WAIT_FOREVER) 
         {
 
             /* Valid timer activate request.  */
 
             /* Determine if the timer still needs activation.  */
-            if (timer_ptr -> tx_timer_internal_list_head == TX_NULL)
+            if (timer_ptr -> tx_timer_internal_list_head == TX_NULL) // 如果tx_timer_internal_list_head为空，则说明定时器不在链表里面
+                                                                     //，也就是没有激活，否则定时器已经激活.head指向对应的_tx_timer_list中对应的某个链表头
             {
 
                 /* Activate the timer.  */
-
+                // 计算把它插入到的_tx_timer_list链表index
                 /* Calculate the amount of time remaining for the timer.  */
                 if (remaining_ticks > TX_TIMER_ENTRIES)
                 {
@@ -126,7 +130,9 @@ ULONG                       expiration_time;
                    the timer lists.  */
 
                 /* Calculate the proper place for the timer.  */
+                // 在循环链表中向前移动找到插入的位置
                 timer_list =  TX_TIMER_POINTER_ADD(_tx_timer_current_ptr, expiration_time);
+                // 循环数组操作。
                 if (TX_TIMER_INDIRECT_TO_VOID_POINTER_CONVERT(timer_list) >= TX_TIMER_INDIRECT_TO_VOID_POINTER_CONVERT(_tx_timer_list_end))
                 {
 
@@ -134,7 +140,8 @@ ULONG                       expiration_time;
                     delta =  TX_TIMER_POINTER_DIF(timer_list, _tx_timer_list_end);
                     timer_list =  TX_TIMER_POINTER_ADD(_tx_timer_list_start, delta);
                 }
-
+                
+                // Mstep 将定时器插入到对应链表结尾处
                 /* Now put the timer on this list.  */
                 if ((*timer_list) == TX_NULL)
                 {
@@ -150,6 +157,7 @@ ULONG                       expiration_time;
                 }
                 else
                 {
+                    // 插入到链表尾部
 
                     /* This list is not NULL, add current timer to the end. */
                     next_timer =                                        *timer_list;
@@ -161,6 +169,7 @@ ULONG                       expiration_time;
                 }
 
                 /* Setup list head pointer.  */
+                // 更新定时器的链表头指针
                 timer_ptr -> tx_timer_internal_list_head =  timer_list;
             }
         }
