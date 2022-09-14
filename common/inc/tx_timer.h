@@ -134,7 +134,7 @@ TIMER_DECLARE ULONG             _tx_timer_created_count;
 
 /* Define the pointer to the timer that has expired and is being processed.  */
 
-TIMER_DECLARE TX_TIMER_INTERNAL *_tx_timer_expired_timer_ptr;
+TIMER_DECLARE TX_TIMER_INTERNAL *_tx_timer_expired_timer_ptr; // 指向超时并且正在处理的定时器
 
 
 #ifndef TX_TIMER_PROCESS_IN_ISR

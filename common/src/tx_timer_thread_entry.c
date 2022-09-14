@@ -114,6 +114,7 @@ TX_TIMER                    *timer_ptr;
             TX_DISABLE
 
             /* Save the current timer expiration list pointer.  */
+            // 1 Mstep 获取超时定时器链表头
             expired_timers =  *_tx_timer_current_ptr;
 
             /* Modify the head pointer in the first timer in the list, if there
@@ -125,10 +126,12 @@ TX_TIMER                    *timer_ptr;
             }
 
             /* Set the current list pointer to NULL.  */
+            // 2 Mstep 从_tx_timer_list下把链表指针删除
             *_tx_timer_current_ptr =  TX_NULL;
 
             /* Move the current pointer up one timer entry wrap if we get to
                the end of the list.  */
+            // 3 Mstep 移动current指针到下一个链表数组元素。
             _tx_timer_current_ptr =  TX_TIMER_POINTER_ADD(_tx_timer_current_ptr, 1);
             if (_tx_timer_current_ptr == _tx_timer_list_end)
             {
@@ -137,6 +140,7 @@ TX_TIMER                    *timer_ptr;
             }
 
             /* Clear the expired flag.  */
+            // 4 Mstep 清除超时标记位
             _tx_timer_expired =  TX_FALSE;
 
             /* Restore interrupts temporarily.  */
@@ -147,6 +151,7 @@ TX_TIMER                    *timer_ptr;
 
             /* Next, process the expiration of the associated timers at this
                time slot.  */
+            // 5 Mstep 循环处理链表下的定时器
             while (expired_timers != TX_NULL)
             {
 
@@ -160,6 +165,7 @@ TX_TIMER                    *timer_ptr;
                 reactivate_timer =  TX_NULL;
 
                 /* Determine if this is the only timer.  */
+                // 6 Mstep 从expired_timers中取出 current_timer
                 if (current_timer == next_timer)
                 {
 
@@ -189,7 +195,7 @@ TX_TIMER                    *timer_ptr;
 
                 /* Determine if the timer has expired or if it is just a really
                    big timer that needs to be placed in the list again.  */
-                if (current_timer -> tx_timer_internal_remaining_ticks > TX_TIMER_ENTRIES)
+                if (current_timer -> tx_timer_internal_remaining_ticks > TX_TIMER_ENTRIES) // 剩余滴答数大于一圈
                 {
 
                     /* Timer is bigger than the timer entries and must be
@@ -230,6 +236,7 @@ TX_TIMER                    *timer_ptr;
                     /* Make the timer appear that it is still active while interrupts
                        are enabled.  This will permit proper processing of a timer
                        deactivate from an ISR.  */
+                    // 
                     current_timer -> tx_timer_internal_list_head =    &reactivate_timer;
                     current_timer -> tx_timer_internal_active_next =  current_timer;
 
@@ -266,6 +273,7 @@ TX_TIMER                    *timer_ptr;
 
                     /* Copy the calling function and ID into local variables before interrupts
                        are re-enabled.  */
+                    // 7 Mstep 获取定时器回调函数
                     timeout_function =  current_timer -> tx_timer_internal_timeout_function;
                     timeout_param =     current_timer -> tx_timer_internal_timeout_param;
 
@@ -273,7 +281,7 @@ TX_TIMER                    *timer_ptr;
                     current_timer -> tx_timer_internal_remaining_ticks =  current_timer -> tx_timer_internal_re_initialize_ticks;
 
                     /* Determine if the timer should be reactivated.  */
-                    if (current_timer -> tx_timer_internal_remaining_ticks != ((ULONG) 0))
+                    if (current_timer -> tx_timer_internal_remaining_ticks != ((ULONG) 0)) // 查看是否为循环定时器，不为0才是循环定时器
                     {
 
                         /* Make the timer appear that it is still active while processing
@@ -286,6 +294,7 @@ TX_TIMER                    *timer_ptr;
                         /* Setup the temporary timer list head pointer.  */
                         reactivate_timer =  current_timer;
                     }
+                    // 非循环的，直接head置为NULL
                     else
                     {
 
@@ -301,7 +310,8 @@ TX_TIMER                    *timer_ptr;
                 /* Restore interrupts for timer expiration call.  */
                 TX_RESTORE
 
-                /* Call the timer-expiration function, if non-NULL.  */
+                /* Call the timer-expiration function, if non-NULL.  */// 调用定时器回调函数
+                // 8 Mstep函数在定时器超时线程中执行。
                 if (timeout_function != TX_NULL)
                 {
 
@@ -315,6 +325,7 @@ TX_TIMER                    *timer_ptr;
                 _tx_timer_expired_timer_ptr =  TX_NULL;
 
                 /* Determine if the timer needs to be reactivated.  */
+                // 9 Mstep循环定时器需要重新激活放入到_tx_timer_list中
                 if (reactivate_timer == current_timer)
                 {
 
@@ -426,7 +437,7 @@ TX_TIMER                    *timer_ptr;
             }
 
             /* Finally, suspend this thread and wait for the next expiration.  */
-
+            // 10 Mstep 定时器处理完后，需要重新挂起定时器超时处理函数
             /* Determine if another expiration took place while we were in this
                thread.  If so, process another expiration.  */
             if (_tx_timer_expired == TX_FALSE)

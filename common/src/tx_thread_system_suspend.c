@@ -80,7 +80,7 @@
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-VOID  _tx_thread_system_suspend(TX_THREAD *thread_ptr)
+VOID  _tx_thread_system_suspend(TX_THREAD *thread_ptr) // 挂起当前线程
 #ifndef TX_NOT_INTERRUPTABLE
 {
 
@@ -123,8 +123,8 @@ ULONG                       time_stamp =  ((ULONG) 0);
 #ifndef TX_NO_TIMER
 
     /* Is the current thread suspending?  */
-    if (thread_ptr == current_thread)
-    {
+    if (thread_ptr == current_thread)  // 1 Mstep 判断需要挂起线程是否为当前运行线程，如果是循环定时器，将定时器挂入_tx_timer_list中
+    {// 线程获取不到信号量或者sleep等挂起自己，可能带有挂起超时时间
 
         /* Pickup the wait option.  */
         timeout =  thread_ptr -> tx_thread_timer.tx_timer_internal_remaining_ticks;
@@ -138,11 +138,11 @@ ULONG                       time_stamp =  ((ULONG) 0);
             {
 
                 /* Activate the thread timer with the timeout value setup in the caller.  */
-                _tx_timer_system_activate(&(thread_ptr -> tx_thread_timer));
+                _tx_timer_system_activate(&(thread_ptr -> tx_thread_timer)); // 启动超时定时器
             }
         }
 
-        /* Yes, reset time slice for current thread.  */
+        /* Yes, reset time slice for current thread.  */ // 重新设定时间片
         _tx_timer_time_slice =  thread_ptr -> tx_thread_new_time_slice;
     }
 #endif
@@ -161,7 +161,7 @@ ULONG                       time_stamp =  ((ULONG) 0);
 
     /* Check to make sure the thread suspending flag is still set.  If not, it
        has already been resumed.  */
-    if (thread_ptr -> tx_thread_suspending == TX_TRUE)
+    if (thread_ptr -> tx_thread_suspending == TX_TRUE) // 线程挂起过程中
     {
 
         /* Thread state change.  */
@@ -193,30 +193,30 @@ ULONG                       time_stamp =  ((ULONG) 0);
 #endif
 
         /* Actually suspend this thread.  But first, clear the suspending flag.  */
-        thread_ptr -> tx_thread_suspending =  TX_FALSE;
+        thread_ptr -> tx_thread_suspending =  TX_FALSE; // 清除挂起中标志
 
         /* Pickup priority of thread.  */
-        priority =  thread_ptr -> tx_thread_priority;
+        priority =  thread_ptr -> tx_thread_priority; 
 
         /* Pickup the next ready thread pointer.  */
         ready_next =      thread_ptr -> tx_thread_ready_next;
 
         /* Determine if there are other threads at this priority that are
            ready.  */
-        if (ready_next != thread_ptr)
+        if (ready_next != thread_ptr) // // 1 Mstep 该线程是此优先级下唯一线程
         {
 
             /* Yes, there are other threads at this priority ready.  */
 
             /* Pickup the previous ready thread pointer.  */
-            ready_previous =  thread_ptr -> tx_thread_ready_previous;
+            ready_previous =  thread_ptr -> tx_thread_ready_previous; // 从就绪链表中删除需要被挂起的线程
 
             /* Just remove this thread from the priority list.  */
             ready_next -> tx_thread_ready_previous =    ready_previous;
             ready_previous -> tx_thread_ready_next =    ready_next;
 
             /* Determine if this is the head of the priority list.  */
-            if (_tx_thread_priority_list[priority] == thread_ptr)
+            if (_tx_thread_priority_list[priority] == thread_ptr) // 如果是链表头，更新链表头
             {
 
                 /* Update the head pointer of this priority list.  */
@@ -229,10 +229,9 @@ ULONG                       time_stamp =  ((ULONG) 0);
                 /* Calculate the index into the bit map array.  */
                 map_index =  priority/((UINT) 32);
 #endif
-
                 /* Check for a thread preempted that had preemption threshold set.  */
-                if (_tx_thread_preempted_maps[MAP_INDEX] != ((ULONG) 0))
-                {
+                if (_tx_thread_preempted_maps[MAP_INDEX] != ((ULONG) 0)) // 如果是链表头线程可能处于被抢占状态，如果该线程启用了抢占，那么对应的抢占标记也被设置了。
+                {                                                        // 线程挂起时需要清除；如果没有标记抢占，那么本来就是清除状态，再次清除也不影响。
 
                     /* Ensure that this thread's priority is clear in the preempt map.  */
                     TX_MOD32_BIT_SET(priority, priority_bit)
@@ -253,12 +252,13 @@ ULONG                       time_stamp =  ((ULONG) 0);
 #endif
             }
         }
-        else
+
+        else // 当前线程是此优先级下的唯一一个线程
         {
 
             /* This is the only thread at this priority ready to run.  Set the head
                pointer to NULL.  */
-            _tx_thread_priority_list[priority] =    TX_NULL;
+            _tx_thread_priority_list[priority] =    TX_NULL; // 对应优先级head设置为NULL，表示此优先级下无ready的线程
 
 #if TX_MAX_PRIORITIES > 32
 
@@ -266,7 +266,7 @@ ULONG                       time_stamp =  ((ULONG) 0);
             map_index =  priority/((UINT) 32);
 #endif
 
-            /* Clear this priority bit in the ready priority bit map.  */
+            /* Clear this priority bit in the ready priority bit map.  */ // 清除对应优先级包含ready线程标志
             TX_MOD32_BIT_SET(priority, priority_bit)
             _tx_thread_priority_maps[MAP_INDEX] =  _tx_thread_priority_maps[MAP_INDEX] & (~(priority_bit));
 
@@ -285,7 +285,7 @@ ULONG                       time_stamp =  ((ULONG) 0);
 #ifndef TX_DISABLE_PREEMPTION_THRESHOLD
 
             /* Check for a thread preempted that had preemption-threshold set.  */
-            if (_tx_thread_preempted_maps[MAP_INDEX] != ((ULONG) 0))
+            if (_tx_thread_preempted_maps[MAP_INDEX] != ((ULONG) 0)) // 清除抢占标记
             {
 
                 /* Ensure that this thread's priority is clear in the preempt map.  */
@@ -331,7 +331,7 @@ ULONG                       time_stamp =  ((ULONG) 0);
             priority_map =    _tx_thread_priority_maps[MAP_INDEX];
 
             /* Make a quick check for no other threads ready for execution.  */
-            if (priority_map == ((ULONG) 0))
+            if (priority_map == ((ULONG) 0)) // priority_map为0 表示其他优先级也没有就绪线程
             {
 
                 /* Nothing else is ready.  Set highest priority and execute thread
@@ -384,7 +384,7 @@ ULONG                       time_stamp =  ((ULONG) 0);
                 return;
 #endif
             }
-            else
+            else // 其他有优先级有就绪线程
             {
 
                 /* Other threads at different priority levels are ready to run.  */
@@ -393,16 +393,16 @@ ULONG                       time_stamp =  ((ULONG) 0);
                 TX_LOWEST_SET_BIT_CALCULATE(priority_map, priority_bit)
 
                 /* Setup the next highest priority variable.  */
-                _tx_thread_highest_priority =  base_priority + ((UINT) priority_bit);
+                _tx_thread_highest_priority =  base_priority + ((UINT) priority_bit); // 更新最高优先级
             }
-        }
+        } // 当前线程是此优先级下的唯一一个线程 end
 
-        /* Determine if the suspending thread is the thread designated to execute.  */
-        if (thread_ptr == _tx_thread_execute_ptr)
+        /* Determine if the suspending thread is the thread designated to execute.  */ // 被挂起的线程是下一个需要调度的线程。那么需要重新选一个下一个线程。
+        if (thread_ptr == _tx_thread_execute_ptr) // 设置下一个执行线程
         {
 
             /* Pickup the highest priority thread to execute.  */
-            _tx_thread_execute_ptr =  _tx_thread_priority_list[_tx_thread_highest_priority];
+            _tx_thread_execute_ptr =  _tx_thread_priority_list[_tx_thread_highest_priority]; // 获取高优先级就绪线程
 
 #ifndef TX_DISABLE_PREEMPTION_THRESHOLD
 
@@ -410,7 +410,7 @@ ULONG                       time_stamp =  ((ULONG) 0);
 #if TX_MAX_PRIORITIES > 32
             if (_tx_thread_preempted_map_active != ((ULONG) 0))
 #else
-            if (_tx_thread_preempted_maps[MAP_INDEX] != ((ULONG) 0))
+            if (_tx_thread_preempted_maps[MAP_INDEX] != ((ULONG) 0)) // 是否有 标记了 抢占标记的线程。!= 0 说明有
 #endif
             {
 
@@ -457,19 +457,19 @@ ULONG                       time_stamp =  ((ULONG) 0);
                 TX_LOWEST_SET_BIT_CALCULATE(priority_map, priority_bit)
 
                 /* Setup the highest priority preempted thread.  */
-                priority =  base_priority + ((UINT) priority_bit);
+                priority =  base_priority + ((UINT) priority_bit); // 抢占标记map中的最高优先级
 
                 /* Determine if the next highest priority thread is above the highest priority threshold value.  */
-                if (_tx_thread_highest_priority >= (_tx_thread_priority_list[priority] -> tx_thread_preempt_threshold))
-                {
-
+                if (_tx_thread_highest_priority >= (_tx_thread_priority_list[priority] -> tx_thread_preempt_threshold)) // 如果已ready线程的最高优先级 小于 有抢占标记位
+                {                                                                                                       // 的线程的抢占阈值，那么就先执行之前被抢占出去
+                                                                                                                        // 的线程
                     /* Thread not allowed to execute until earlier preempted thread finishes or lowers its
                        preemption-threshold.  */
-                    _tx_thread_execute_ptr =  _tx_thread_priority_list[priority];
+                    _tx_thread_execute_ptr =  _tx_thread_priority_list[priority];  // 下一个执行的为之前被抢占的线程
 
                     /* Clear the corresponding bit in the preempted map, since the preemption has been restored.  */
                     TX_MOD32_BIT_SET(priority, priority_bit)
-                    _tx_thread_preempted_maps[MAP_INDEX] =  _tx_thread_preempted_maps[MAP_INDEX] & (~(priority_bit));
+                    _tx_thread_preempted_maps[MAP_INDEX] =  _tx_thread_preempted_maps[MAP_INDEX] & (~(priority_bit)); // 清除抢占标记
 
 #if TX_MAX_PRIORITIES > 32
 

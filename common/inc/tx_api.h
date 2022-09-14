@@ -529,8 +529,8 @@ typedef struct TX_THREAD_STRUCT
        For Azure RTOS 6, user shall use TX_EXECUTION_PROFILE_ENABLE instead of TX_ENABLE_EXECUTION_CHANGE_NOTIFY,
        and SHALL NOT add variables to TX_THREAD_EXTENSION_3. */
 #if (defined(TX_EXECUTION_PROFILE_ENABLE) && !defined(TX_ENABLE_EXECUTION_CHANGE_NOTIFY))
-    unsigned long long  tx_thread_execution_time_total;
-    unsigned long long  tx_thread_execution_time_last_start;
+    unsigned long long  tx_thread_execution_time_total; // 统计总共运行了多少时钟周期
+    unsigned long long  tx_thread_execution_time_last_start; // 最后一次开始运行的时间
 #endif
 
     /* Define suspension sequence number.  This is used to ensure suspension is still valid when

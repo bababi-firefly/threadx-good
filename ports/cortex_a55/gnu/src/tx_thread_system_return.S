@@ -68,8 +68,28 @@
     .global _tx_thread_system_return
     .type   _tx_thread_system_return, @function
 _tx_thread_system_return:
+/*
+       Stack Top:      SSPR        Initial SSPR
+                       ELR         Point of interrupt
+                       x28         Initial value for x28
+                       not used    Not used
+                       x26         Initial value for x26
+                       x27         Initial value for x27
+                       x24         Initial value for x24
+                       x25         Initial value for x25
+                       x22         Initial value for x22
+                       x23         Initial value for x23
+                       x20         Initial value for x20
+                       x21         Initial value for x21
+                       x18         Initial value for x18
+                       x19         Initial value for x19
+                       x29         Initial value for x29 (frame pointer)
+                       x30         Initial value for x30 (link register)
+                       0           For stack backtracing
 
-    /* Save minimal context on the stack.  */
+    Stack Bottom: (higher memory address)  */
+ */
+    /* Save minimal context on the stack.  */ // 1 Mstep 寄存器入栈
 
     MRS     x0, DAIF                            // Pickup DAIF
     MSR     DAIFSet, 0x3                        // Lockout interrupts
@@ -79,8 +99,8 @@ _tx_thread_system_return:
     STP     x23, x24, [sp, #-16]!               // Save x23, x24
     STP     x25, x26, [sp, #-16]!               // Save x25, x26
     STP     x27, x28, [sp, #-16]!               // Save x27, x28
-    LDR     x5, =_tx_thread_current_ptr         // Pickup address of current ptr
-    LDR     x6, [x5, #0]                        // Pickup current thread pointer
+    LDR     x5, =_tx_thread_current_ptr         // Pickup address of current ptr  
+    LDR     x6, [x5, #0]                        // Pickup current thread pointer // 获取当前线程指针
 
 #ifdef ENABLE_ARM_FP
     LDR     w7, [x6, #248]                      // Pickup FP enable flag
@@ -105,7 +125,7 @@ _skip_fp_save:
 
     MOV     x19, x5                             // Save x5
     MOV     x20, x6                             // Save x6
-    BL      _tx_execution_thread_exit           // Call the thread exit function
+    BL      _tx_execution_thread_exit           // Call the thread exit function   // 线程退出时，统计线程的运行时间。更新总运行时间
     MOV     x5, x19                             // Restore x5
     MOV     x6, x20                             // Restore x6
 #endif
@@ -121,7 +141,7 @@ _skip_fp_save:
     STR     x4, [x6, #8]                        // Save thread stack pointer
     LDR     x3, =_tx_thread_system_stack_ptr    // Pickup address of system stack
     LDR     x4, [x3, #0]                        // Pickup system stack pointer
-    MOV     sp, x4                              // Setup system stack pointer
+    MOV     sp, x4                              // Setup system stack pointer   // 将SP设置为system_stack
 
     /* Determine if the time-slice is active.  */
     // if (_tx_timer_time_slice)

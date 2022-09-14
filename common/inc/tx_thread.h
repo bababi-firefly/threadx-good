@@ -318,7 +318,7 @@ THREAD_DECLARE  TX_THREAD *     _tx_thread_current_ptr;
    to remember that this is not necessarily equal to the current thread
    pointer.  */
 
-THREAD_DECLARE  TX_THREAD *     _tx_thread_execute_ptr;
+THREAD_DECLARE  TX_THREAD *     _tx_thread_execute_ptr; // next 需要去执行的线程
 
 
 /* Define the head pointer of the created thread list.  */
@@ -337,7 +337,7 @@ THREAD_DECLARE  ULONG           _tx_thread_created_count;
    initialized to TX_INITIALIZE_IN_PROGRESS to indicate initialization is
    active.  */
 
-// 0 表示线程在执行获取系统空闲
+// 0 表示线程在执行或者系统空闲
 // other 表示中断或者正在初始化
 THREAD_DECLARE  volatile ULONG  _tx_thread_system_state; 
 
@@ -347,7 +347,7 @@ THREAD_DECLARE  volatile ULONG  _tx_thread_system_state;
    only one bit map. Each bit within a priority bit map represents that one
    or more threads at the associated thread priority are ready.  */
 
-THREAD_DECLARE  ULONG           _tx_thread_priority_maps[TX_MAX_PRIORITIES/32];
+THREAD_DECLARE  ULONG           _tx_thread_priority_maps[TX_MAX_PRIORITIES/32]; // 每一位代表此对应优先级级别是否有线程在ready链表中
 
 
 /* Define the priority map active bit map that specifies which of the previously
@@ -383,7 +383,7 @@ THREAD_DECLARE  ULONG           _tx_thread_preempted_map_active;
    execution.  It is important to note that this is not necessarily the same
    as the priority of the thread pointed to by _tx_execute_thread.  */
 
-THREAD_DECLARE  UINT            _tx_thread_highest_priority;
+THREAD_DECLARE  UINT            _tx_thread_highest_priority; // 保存ready线程中的最高优先级
 
 
 /* Define the array of thread pointers.  Each entry represents the threads that
