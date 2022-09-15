@@ -89,8 +89,8 @@ _tx_thread_system_return:
 
     Stack Bottom: (higher memory address)  */
  */
-    /* Save minimal context on the stack.  */ // 1 Mstep 寄存器入栈
-
+    /* Save minimal context on the stack.  */ 
+    // 1 Mstep 上下文入栈
     MRS     x0, DAIF                            // Pickup DAIF
     MSR     DAIFSet, 0x3                        // Lockout interrupts
     STP     x29, x30, [sp, #-16]!               // Save x29 (frame pointer), x30 (link register)
@@ -100,9 +100,11 @@ _tx_thread_system_return:
     STP     x25, x26, [sp, #-16]!               // Save x25, x26
     STP     x27, x28, [sp, #-16]!               // Save x27, x28
     LDR     x5, =_tx_thread_current_ptr         // Pickup address of current ptr  
-    LDR     x6, [x5, #0]                        // Pickup current thread pointer // 获取当前线程指针
+    // 2 Mstep 获取当前线程指针
+    LDR     x6, [x5, #0]                        // Pickup current thread pointer 
 
-#ifdef ENABLE_ARM_FP
+    // 3 Mstep 应该是如果使能了SIMU，则要将对应的Q寄存器也进行保存
+#ifdef ENABLE_ARM_FP                            
     LDR     w7, [x6, #248]                      // Pickup FP enable flag
     CMP     w7, #0                              // Is FP enabled?
     BEQ     _skip_fp_save                       // No, skip FP save
@@ -122,10 +124,10 @@ _skip_fp_save:
 #if (defined(TX_ENABLE_EXECUTION_CHANGE_NOTIFY) || defined(TX_EXECUTION_PROFILE_ENABLE))
 
     /* Call the thread exit function to indicate the thread is no longer executing.  */
-
+    // 4 Mstep 线程退出时，统计线程的运行时间。更新总运行时间
     MOV     x19, x5                             // Save x5
     MOV     x20, x6                             // Save x6
-    BL      _tx_execution_thread_exit           // Call the thread exit function   // 线程退出时，统计线程的运行时间。更新总运行时间
+    BL      _tx_execution_thread_exit           // Call the thread exit function   
     MOV     x5, x19                             // Restore x5
     MOV     x6, x20                             // Restore x6
 #endif
@@ -136,9 +138,11 @@ _skip_fp_save:
     /* Save current stack and switch to system stack.  */
     // _tx_thread_current_ptr -> tx_thread_stack_ptr =  sp;
     // sp = _tx_thread_system_stack_ptr;
-
+    // 5 Mstep 切换堆栈指针
     MOV     x4, sp                              //
+    // 保存SP到本线程结构中
     STR     x4, [x6, #8]                        // Save thread stack pointer
+    // 获取system堆栈指针msp，并更新到sp中
     LDR     x3, =_tx_thread_system_stack_ptr    // Pickup address of system stack
     LDR     x4, [x3, #0]                        // Pickup system stack pointer
     MOV     sp, x4                              // Setup system stack pointer   // 将SP设置为system_stack
@@ -147,6 +151,7 @@ _skip_fp_save:
     // if (_tx_timer_time_slice)
     // {
 
+    // 查看当前slice是否有剩余
     MOV     x4, #0                              // Build clear value
     CMP     w1, #0                              // Is a time-slice active?
     BEQ     __tx_thread_dont_save_ts            // No, don't save the time-slice
@@ -156,6 +161,7 @@ _skip_fp_save:
        // _tx_timer_time_slice =  0;
 
     STR     w4, [x2, #0]                        // Clear time-slice
+    // 6 Mstep 保存时间片到线程结构中
     STR     w1, [x6, #36]                       // Store current time-slice
 
     // }
@@ -164,6 +170,7 @@ __tx_thread_dont_save_ts:
     /* Clear the current thread pointer.  */
     // _tx_thread_current_ptr =  TX_NULL;
 
+    // 线程不需要调度了，time_slice为0, 线程指针置为NULL。跳转到调度。
     STR     x4, [x5, #0]                        // Clear current thread pointer
 
     B       _tx_thread_schedule                 // Jump to scheduler!

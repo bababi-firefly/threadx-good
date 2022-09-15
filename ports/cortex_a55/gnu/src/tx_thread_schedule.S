@@ -80,7 +80,7 @@ _tx_thread_schedule:
     /* Wait for a thread to execute.  */
     // do
     // {
-
+    // 1 Mstep获取下一个需要执行线程的指针
     LDR     x1, =_tx_thread_execute_ptr         // Address of thread execute ptr
 
 #ifdef TX_ENABLE_WFI
@@ -88,7 +88,8 @@ __tx_thread_schedule_loop:
     LDR     x0, [x1, #0]                        // Pickup next thread to execute
     CMP     x0, #0                              // Is it NULL?
     BNE     _tx_thread_schedule_thread          //
-    WFI                                         //
+    // wait for interrupt
+    WFI                                         // 对WFI来说，执行WFI指令后，ARM core会立即进入low-power standby state，直到有WFI Wakeup events发生。
     B       __tx_thread_schedule_loop           // Keep looking for a thread
 _tx_thread_schedule_thread:
 #else
@@ -103,18 +104,20 @@ __tx_thread_schedule_loop:
 
     /* Yes! We have a thread to execute.  Lockout interrupts and
        transfer control to it.  */
-
+    // 2 Mstep 找到了一个可以执行的线程
     MSR     DAIFSet, 0x3                        // Lockout interrupts
 
     /* Setup the current thread pointer.  */
     // _tx_thread_current_ptr =  _tx_thread_execute_ptr;
 
+    // 3 Mstep 载入新的线程 x0中是线程指针
+    //   3.1 设置_tx_thread_current_ptr指针为将要执行的线程指针
     LDR     x1, =_tx_thread_current_ptr         // Pickup address of current thread
     STR     x0, [x1, #0]                        // Setup current thread pointer
 
     /* Increment the run count for this thread.  */
     // _tx_thread_current_ptr -> tx_thread_run_count++;
-
+    //  3.2 运行次数++
     LDR     w2, [x0, #4]                        // Pickup run counter
     LDR     w3, [x0, #36]                       // Pickup time-slice for this thread
     ADD     w2, w2, #1                          // Increment thread run-counter
@@ -124,7 +127,10 @@ __tx_thread_schedule_loop:
     // _tx_timer_time_slice =  _tx_thread_current_ptr -> tx_thread_time_slice;
 
     LDR     x2, =_tx_timer_time_slice           // Pickup address of time slice
+
                                                 //   variable
+    //  3.3 获取堆栈指针SP,并设置到sp中
+    //  3.4 设置 _tx_timer_time_slice 为线程中的time_slice
     LDR     x4, [x0, #8]                        // Switch stack pointers
     MOV     sp, x4                              //
     STR     w3, [x2, #0]                        // Setup time-slice
@@ -132,7 +138,7 @@ __tx_thread_schedule_loop:
 #if (defined(TX_ENABLE_EXECUTION_CHANGE_NOTIFY) || defined(TX_EXECUTION_PROFILE_ENABLE))
 
     /* Call the thread entry function to indicate the thread is executing.  */
-
+    // 统计时间之类
     MOV     x19, x0                             // Save x0
     BL      _tx_execution_thread_enter          // Call the thread execution enter function
     MOV     x0, x19                             // Restore x0
@@ -184,6 +190,7 @@ __tx_thread_schedule_loop:
     LDP     q0,  q1,  [sp], #32                 // Recover q0, q1
 _skip_interrupt_fp_restore:
 #endif
+//  出栈 入 寄存器
     LDP     x28, x29, [sp], #16                 // Recover x28
     LDP     x26, x27, [sp], #16                 // Recover x26, x27
     LDP     x24, x25, [sp], #16                 // Recover x24, x25
