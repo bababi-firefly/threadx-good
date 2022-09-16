@@ -108,7 +108,7 @@ ULONG                       timeout_param =  ((ULONG) 0);
 TX_TIMER                    *timer_ptr;
 #endif
 #endif
-
+// 处理定时超时有两种方式，一种是线程，一种是中断
 #ifndef TX_TIMER_PROCESS_IN_ISR
 
     /* Don't process in the ISR, wakeup the system timer thread to process the

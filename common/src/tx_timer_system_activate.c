@@ -104,7 +104,7 @@ ULONG                       expiration_time;
             /* Valid timer activate request.  */
 
             /* Determine if the timer still needs activation.  */
-            if (timer_ptr -> tx_timer_internal_list_head == TX_NULL) // 如果tx_timer_internal_list_head为空，则说明定时器不在链表里面
+            if (timer_ptr -> tx_timer_internal_list_head == TX_NULL) // 如果tx_timer_internal_list_head为空，则说明定时器不在链表里面  NOTICE.........
                                                                      //，也就是没有激活，否则定时器已经激活.head指向对应的_tx_timer_list中对应的某个链表头
             {
 

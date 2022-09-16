@@ -136,7 +136,7 @@ ULONG                       time_stamp =  ((ULONG) 0);
             /* Make sure the suspension is not a wait-forever.  */
             if (timeout != TX_WAIT_FOREVER)
             {
-
+                // 激活定时器。
                 /* Activate the thread timer with the timeout value setup in the caller.  */
                 _tx_timer_system_activate(&(thread_ptr -> tx_thread_timer)); // 启动超时定时器
             }

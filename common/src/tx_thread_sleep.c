@@ -134,7 +134,7 @@ TX_THREAD       *thread_ptr;
         /* Just return with a successful status.  */
         status =  TX_SUCCESS;
     }
-    else
+    else // 2 Mstep 到这才是真正的睡眠
     {
 
         /* Determine if the preempt disable flag is non-zero.  */
@@ -154,10 +154,10 @@ TX_THREAD       *thread_ptr;
             TX_TRACE_IN_LINE_INSERT(TX_TRACE_THREAD_SLEEP, TX_ULONG_TO_POINTER_CONVERT(timer_ticks), thread_ptr -> tx_thread_state, TX_POINTER_TO_ULONG_CONVERT(&status), 0, TX_TRACE_THREAD_EVENTS)
 
             /* Log this kernel call.  */
-            TX_EL_THREAD_SLEEP_INSERT
+            TX_EL_THREAD_SLEEP_INSERT // 无用
 
             /* Suspend the current thread.  */
-
+            // 3 Mstep 开始挂起这个线程
             /* Set the state to suspended.  */
             thread_ptr -> tx_thread_state =    TX_SLEEP;
 
@@ -170,7 +170,7 @@ TX_THREAD       *thread_ptr;
             TX_RESTORE
 #else
 
-            // 设置挂起状态，设置定时器定时时间
+            // 4 Mstep 设置挂起状态，设置定时器定时时间
             /* Set the suspending flag. */
             thread_ptr -> tx_thread_suspending =  TX_TRUE;
 
